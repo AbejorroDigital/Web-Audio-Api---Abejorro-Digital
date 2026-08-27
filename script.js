@@ -1,5 +1,5 @@
 /**
- * @file Consola DSP Modular con Web Audio API (Optimizada para Móviles)
+ * @file Consola DSP Modular con Web Audio API (Optimizada para Móviles y Perillas CSS Clásicas)
  */
 
 let audioCtx, streamOriginal, visualizacionId;
@@ -42,10 +42,10 @@ eqFrequencies.forEach((freq, index) => {
     div.setAttribute('data-unit', 'dB');
 
     div.innerHTML = `
-                <span class="title" style="font-size: 9px;">${eqLabels[index]}</span>
-                <div class="knob-wrapper" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 50 50"><circle class="bg-ring" cx="25" cy="25" r="20"></circle><circle class="progress-ring" cx="25" cy="25" r="20"></circle></svg></div>
-                <input type="number" class="knob-input" value="0" min="-12" max="12" step="0.5" style="width:35px; font-size:9px;">
-            `;
+        <span class="title" style="font-size: 9px;">${eqLabels[index]}</span>
+        <div class="knob-dial" style="width:36px;height:36px;"><div class="knob-indicator" style="top:3px;height:10px;transform-origin:50% 15px;"></div></div>
+        <input type="number" class="knob-input" value="0" min="-12" max="12" step="0.5" style="width:40px; font-size:9px;">
+    `;
     eqContainer.appendChild(div);
 });
 
@@ -75,13 +75,13 @@ function actualizarPresetReverb() {
 }
 
 /**
- * Inicializa perillas con compatibilidad híbrida Mouse y Touch (Móvil).
+ * Inicializa perillas rotativas CSS y gestiona la interacción Mouse y Touch.
  */
 function inicializarPerillas() {
     document.querySelectorAll('.knob-control-container').forEach(container => {
-        const wrapper = container.querySelector('.knob-wrapper');
+        const wrapper = container.querySelector('.knob-dial');
+        const indicator = container.querySelector('.knob-indicator');
         const input = container.querySelector('.knob-input');
-        const progressRing = container.querySelector('.progress-ring');
 
         const min = parseFloat(container.dataset.min);
         const max = parseFloat(container.dataset.max);
@@ -94,9 +94,12 @@ function inicializarPerillas() {
             val = parseFloat(val.toFixed(decimals));
             input.value = val;
 
+            // Mapeo lineal del valor a grados de rotación (-135° a +135°, total 270°)
             const porcentaje = (val - min) / (max - min);
-            const offset = 125.6 - (porcentaje * 125.6);
-            progressRing.style.strokeDashoffset = offset;
+            const angle = -135 + (porcentaje * 270);
+            if (indicator) {
+                indicator.style.transform = `rotate(${angle}deg)`;
+            }
 
             aplicarCambioAudio(param, val, container);
         }
@@ -115,7 +118,7 @@ function inicializarPerillas() {
             if (!isDragging) return;
             const deltaY = startY - clientY;
             const range = max - min;
-            const newVal = startVal + (deltaY / 150) * range; // Sensibilidad adaptada para pantallas táctiles
+            const newVal = startVal + (deltaY / 150) * range;
             actualizarGraficoYAudio(newVal);
         }
 
@@ -373,7 +376,7 @@ document.getElementById('btnStart').addEventListener('click', async () => {
 
         micSource = audioCtx.createMediaStreamSource(streamOriginal);
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512; // Optimizado para rendimiento en móvil
+        analyser.fftSize = 512;
         masterGain = audioCtx.createGain();
 
         mainLowpass = audioCtx.createBiquadFilter();

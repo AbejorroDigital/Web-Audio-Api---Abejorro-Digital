@@ -13,38 +13,37 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
     <div class="panel">
         <h2><span class="floating-bee">🐝</span> Web Audio API - Abejorro Digital</h2>
-        <label for="audioSource" style="margin-bottom: 5px; display:block;">Fuente de Audio:</label>
-        <select id="audioSource" style="width: 100%; margin-bottom: 15px; padding: 10px; border-radius: 6px;">
-            <option value="mic">🎤 Micrófono Principal</option>
-            <option value="system">💻 Audio del Navegador / Sistema</option>
-        </select>
 
-        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <button id="btnStart" style="flex: 2; padding: 10px; border-radius: 6px; font-weight: bold;">▶ Iniciar Motor
-                de Audio</button>
-            <button id="btnStop" class="stop"
-                style="flex: 1; padding: 10px; border-radius: 6px; font-weight: bold; display: none;">🛑
-                Detener</button>
+        <div class="master-control-bar">
+            <div class="source-group">
+                <label for="audioSource">Fuente de Audio:</label>
+                <select id="audioSource">
+                    <option value="mic">🎤 Micrófono Principal</option>
+                    <option value="system">💻 Audio del Navegador / Sistema</option>
+                </select>
+            </div>
+
+            <div class="action-buttons">
+                <button id="btnStart">▶ Iniciar Motor de Audio</button>
+                <button id="btnStop" class="stop" style="display: none;">🛑 Detener</button>
+            </div>
         </div>
 
         <div class="visualizer-container">
-            <div class="freq-info-overlay" id="freqDescription"
-                style="padding: 6px; font-size: 11px; color: #00f5ff; background: #111;">Frecuencia Dominante: --</div>
+            <div class="freq-info-overlay" id="freqDescription">Frecuencia Dominante: --</div>
             <canvas id="visualizer"></canvas>
         </div>
 
         <!-- BANCO DE CABLES / ENRUTAMIENTO (PATCH BAY) -->
         <div class="patch-bay">
             <h3>🔌 Banco de Conexión (Enrutar Cadena DSP)</h3>
-            <p style="font-size: 11px; color: #00f5ff; margin: 0;">Arrastra los módulos para reorganizar el
-                procesamiento:</p>
+            <p>Arrastra los módulos horizontalmente para reorganizar el orden de procesamiento en tiempo real:</p>
             <div class="patch-slots" id="patchSlots">
                 <div class="patch-chip" draggable="true" data-mod="filter">Filtro Lowpass</div>
                 <div class="patch-chip" draggable="true" data-mod="bandpass">Filtro Pasa-Banda</div>
@@ -58,152 +57,141 @@
         <div class="rack-grid">
 
             <!-- MÓDULO 1: FILTRO LOWPASS -->
-            <div class="module" id="modFilter" style="border-color: #2196F3; opacity: 0.5;">
+            <div class="module" id="modFilter" style="border-color: #2196F3;">
                 <div class="module-header">
                     <h3>Filtro Pasa-Bajos</h3>
                     <button id="btnFilterPower" class="power-switch">Power: OFF</button>
                 </div>
-                <div style="font-size: 11px; color: #00f5ff; margin-bottom: 8px;" id="lblFs">fs: -- kHz</div>
+                <div class="module-subtitle" id="lblFs">fs: -- kHz</div>
 
-                <div class="flex-row" style="margin-top: 8px;">
+                <div class="flex-row">
                     <div class="knob-control-container" data-param="fc" data-min="50" data-max="20000" data-step="10"
                         data-val="20000" data-unit="Hz">
                         <span class="title">Corte (fc)</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="20000" min="50" max="20000" step="10">
                     </div>
 
                     <div class="knob-control-container" data-param="qFactor" data-min="0.0001" data-max="15"
                         data-step="0.1" data-val="1.0" data-unit="">
                         <span class="title">Resonancia (Q)</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="1.0" min="0.0001" max="15" step="0.1">
                     </div>
 
                     <div class="knob-control-container" data-param="gainFiltro" data-min="0" data-max="3"
                         data-step="0.1" data-val="1.0" data-unit="x">
                         <span class="title">Ganancia (G)</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="1.0" min="0" max="3" step="0.1">
                     </div>
                 </div>
             </div>
 
             <!-- MÓDULO 2: FILTRO PASA-BANDA -->
-            <div class="module" id="modBandpass" style="border-color: #00bcd4; opacity: 0.5;">
+            <div class="module" id="modBandpass" style="border-color: #00bcd4;">
                 <div class="module-header">
                     <h3>Filtro Pasa-Banda</h3>
                     <button id="btnBandpassPower" class="power-switch">Power: OFF</button>
                 </div>
-                <div style="font-size: 11px; color: #00f5ff; margin-bottom: 8px;">Corte Dual (HighCut / LowCut)</div>
+                <div class="module-subtitle">Corte Dual (HighCut / LowCut)</div>
 
-                <div class="flex-row" style="margin-top: 8px;">
+                <div class="flex-row">
                     <div class="knob-control-container" data-param="bpLowCut" data-min="20" data-max="5000"
                         data-step="10" data-val="100" data-unit="Hz">
                         <span class="title">LowCut</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="100" min="20" max="5000" step="10">
                     </div>
 
                     <div class="knob-control-container" data-param="bpHighCut" data-min="500" data-max="20000"
                         data-step="50" data-val="8000" data-unit="Hz">
                         <span class="title">HighCut</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="8000" min="500" max="20000" step="50">
                     </div>
                 </div>
             </div>
 
             <!-- MÓDULO 3: ECUALIZADOR GRÁFICO -->
-            <div class="module" id="modEq" style="border-color: #ff9800; opacity: 0.5;">
+            <div class="module" id="modEq" style="border-color: #ff9800;">
                 <div class="module-header">
                     <h3>Eq Gráfico (10 Bandas)</h3>
                     <button id="btnEqPower" class="power-switch">Power: OFF</button>
                 </div>
-                <div class="eq-container" id="eqContainer"
-                    style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;"></div>
+                <div class="eq-container" id="eqContainer"></div>
 
-                <div
-                    style="margin-top: 12px; border-top: 1px dashed #444; padding-top: 8px; display: flex; justify-content: center;">
+                <div class="eq-trim-section">
                     <div class="knob-control-container" data-param="eqGain" data-min="0.5" data-max="2" data-step="0.05"
                         data-val="1.0" data-unit="x">
                         <span class="title">Trim Global EQ</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="1.0" min="0.5" max="2" step="0.05">
                     </div>
                 </div>
             </div>
 
             <!-- MÓDULO 4: UNIDAD DE CHORUS -->
-            <div class="module" id="modChorus" style="border-color: #E91E63; opacity: 0.5;">
+            <div class="module" id="modChorus" style="border-color: #E91E63;">
                 <div class="module-header">
                     <h3>Chorus Modular</h3>
                     <button id="btnChorusPower" class="power-switch">Power: OFF</button>
                 </div>
-                <div style="font-size: 11px; color: #00f5ff; margin-bottom: 8px;">Modulación de Fases</div>
+                <div class="module-subtitle">Modulación de Fases</div>
 
                 <div class="flex-row">
                     <div class="knob-control-container" data-param="chorusRate" data-min="0.1" data-max="10"
                         data-step="0.1" data-val="1.5" data-unit="Hz">
                         <span class="title">Rate (LFO)</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="1.5" min="0.1" max="10" step="0.1">
                     </div>
 
                     <div class="knob-control-container" data-param="chorusDepth" data-min="1" data-max="25"
                         data-step="0.5" data-val="5" data-unit="ms">
                         <span class="title">Depth</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="5" min="1" max="25" step="0.5">
                     </div>
 
                     <div class="knob-control-container" data-param="chorusMix" data-min="0" data-max="1"
                         data-step="0.01" data-val="0.5" data-unit="">
                         <span class="title">Mix Dry/Wet</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="0.5" min="0" max="1" step="0.01">
                     </div>
                 </div>
             </div>
 
             <!-- MÓDULO 5: UNIDAD DE REVERB -->
-            <div class="module" id="modReverb" style="border-color: #9c27b0; opacity: 0.5;">
+            <div class="module" id="modReverb" style="border-color: #9c27b0;">
                 <div class="module-header">
                     <h3>Reverb Algorítmica</h3>
                     <button id="btnReverbPower" class="power-switch">Power: OFF</button>
                 </div>
-                <div style="font-size: 11px; color: #00f5ff; margin-bottom: 8px;">Simulación de Espacios Acústicos</div>
+                <div class="module-subtitle">Simulación de Espacios Acústicos</div>
 
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                    <label for="reverbPreset" style="font-size: 11px;">Seleccionar Espacio:</label>
-                    <select id="reverbPreset" style="width: 100%; padding: 8px; border-radius: 6px;">
+                <div class="reverb-control-box">
+                    <label for="reverbPreset">Seleccionar Espacio:</label>
+                    <select id="reverbPreset">
                         <option value="small">🏢 Sala Pequeña</option>
                         <option value="studio" selected>🎙️ Estudio de Audio</option>
                         <option value="large">🏟️ Sala Grande / Auditorio</option>
@@ -216,16 +204,15 @@
                 <div class="module-header">
                     <h3>Salida Master</h3>
                 </div>
-                <div style="font-size: 11px; color: #00f5ff; margin-bottom: 8px;">Bus Principal</div>
+                <div class="module-subtitle">Bus Principal</div>
 
-                <div class="flex-row" style="justify-content: center; padding-top: 10px;">
+                <div class="flex-row" style="justify-content: center;">
                     <div class="knob-control-container" data-param="volMaster" data-min="0" data-max="2"
                         data-step="0.01" data-val="0.8" data-unit="">
                         <span class="title">Volumen Maestro</span>
-                        <div class="knob-wrapper"><svg>
-                                <circle class="bg-ring" cx="25" cy="25" r="20"></circle>
-                                <circle class="progress-ring" cx="25" cy="25" r="20"></circle>
-                            </svg></div>
+                        <div class="knob-dial">
+                            <div class="knob-indicator"></div>
+                        </div>
                         <input type="number" class="knob-input" value="0.8" min="0" max="2" step="0.01">
                     </div>
                 </div>
@@ -233,7 +220,6 @@
 
         </div>
     </div>
-
 
     <script src="script.js"></script>
 </body>

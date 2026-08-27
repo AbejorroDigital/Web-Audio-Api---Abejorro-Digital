@@ -1,240 +1,385 @@
-        /* ==========================================
-           ESTILOS GENERALES Y PALETA DE COLORES
-           ========================================== */
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* ==========================================
+   ESTILOS GENERALES Y PALETA DE COLORES HARDWARE
+   ========================================== */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        body {
-            background-color: #121212;
-            color: #ffd700;
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+body {
+    background-color: #121212;
+    color: #ffd700;
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Cinzel Decorative', serif;
-            color: #ff8c00;
-        }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Cinzel Decorative', serif;
+    color: #ff8c00;
+    margin: 0;
+}
 
-        a {
-            color: #ff8c00;
-            text-decoration: none;
-        }
+h2 {
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
 
-        a:hover {
-            color: #ff8c00;
-            text-decoration: underline;
-        }
+a {
+    color: #ff8c00;
+    text-decoration: none;
+}
 
-        label,
-        .title {
-            color: #00f5ff !important;
-            font-size: 11px;
-        }
+a:hover {
+    color: #ff8c00;
+    text-decoration: underline;
+}
 
-        button:not(.power-switch),
-        #btnStart,
-        #btnStop {
-            background-color: #ff8c00 !important;
-            color: #121212 !important;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            min-height: 44px;
-            /* Tamaño mínimo táctil recomendado para móviles */
-        }
+label,
+.title {
+    color: #00f5ff !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
 
-        button:hover {
-            opacity: 0.85;
-        }
+button:not(.power-switch),
+#btnStart,
+#btnStop {
+    background-color: #ff8c00 !important;
+    color: #121212 !important;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
 
-        select {
-            background-color: #1a1a1a !important;
-            color: #ffd700 !important;
-            border: 1px solid #ff8c00 !important;
-            font-family: 'Montserrat', sans-serif;
-            min-height: 40px;
-        }
+button:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
 
-        .panel {
-            width: 100%;
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 10px;
-        }
+select {
+    background-color: #1a1a1a !important;
+    color: #ffd700 !important;
+    border: 1px solid #ff8c00 !important;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 6px;
+    padding: 10px;
+    min-height: 42px;
+    width: 100%;
+}
 
-        /* Rejilla Rack Adaptativa Móvil */
-        .rack-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
+.panel {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 15px;
+}
 
-        .module {
-            background: linear-gradient(145deg, #1a1a1a, #141414);
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-            transition: opacity 0.3s ease, border-color 0.3s ease;
-        }
+.master-control-bar {
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+}
 
-        .module-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-        }
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
 
-        .module-header h3 {
-            font-size: 1rem;
-            margin: 0;
-        }
+/* Rejilla Rack Estilo Estudio */
+.rack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
 
-        .power-switch {
-            background: #424242;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-family: 'Montserrat', sans-serif;
-            min-height: 32px;
-        }
+.module {
+    background: linear-gradient(145deg, #1c1c1c, #141414);
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+    opacity: 0.6;
+    transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
 
-        .power-switch.active {
-            background: #4CAF50;
-            font-weight: bold;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-            color: #121212;
-        }
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+}
 
-        .patch-bay {
-            background-color: #181818;
-            border: 1px dashed #555;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
+.module-header h3 {
+    font-size: 1.05rem;
+}
 
-        .patch-bay h3 {
-            font-size: 13px;
-            color: #ff8c00;
-            margin-bottom: 4px;
-        }
+.module-subtitle {
+    font-size: 11px;
+    color: #00f5ff;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
 
-        .patch-slots {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
-        }
+.power-switch {
+    background: #2b2b2b;
+    color: #aaa;
+    border: 1px solid #444;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
 
-        .patch-chip {
-            background: #252525;
-            border: 1px solid #666;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: grab;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            user-select: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            color: #ffd700;
-            touch-action: none;
-        }
+.power-switch.active {
+    background: #4CAF50;
+    color: #121212;
+    border-color: #66BB6A;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+}
 
-        .visualizer-container {
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #333;
-            margin-bottom: 15px;
-        }
+/* Banco de Conexión (Patch Bay) */
+.patch-bay {
+    background-color: #161616;
+    border: 1px dashed #555;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
 
-        canvas {
-            width: 100%;
-            height: 100px;
-            display: block;
-        }
+.patch-bay h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
 
-        /* Contenedores Flexibles para Controles */
-        .flex-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: space-around;
-        }
+.patch-bay p {
+    font-size: 11px;
+    color: #00f5ff;
+    margin: 0 0 10px 0;
+}
 
-        /* Adaptación específica para pantallas móviles pequeñas */
-        @media (max-width: 768px) {
-            .panel {
-                padding: 8px;
-            }
+.patch-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 
-            h2 {
-                font-size: 1.1rem;
-                text-align: center;
-            }
+.patch-chip {
+    background: linear-gradient(to bottom, #2a2a2a, #202020);
+    border: 1px solid #555;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    color: #ffd700;
+    touch-action: none;
+    font-weight: 600;
+}
 
-            .rack-grid {
-                grid-template-columns: 1fr;
-            }
+.patch-chip:active {
+    cursor: grabbing;
+}
 
-            .eq-container {
-                gap: 6px !important;
-            }
+/* Visualizador Espectro */
+.visualizer-container {
+    background: #080808;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #333;
+    margin-bottom: 20px;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.9);
+}
 
-            .knob-control-container {
-                transform: scale(0.95);
-            }
+.freq-info-overlay {
+    padding: 8px;
+    font-size: 11px;
+    color: #00f5ff;
+    background: #111;
+    border-bottom: 1px solid #222;
+    font-weight: 600;
+}
 
-            @keyframes floatBee {
-                0% {
-                    transform: translateY(0px) rotate(0deg) scale(1);
-                }
+canvas {
+    width: 100%;
+    height: 110px;
+    display: block;
+}
 
-                25% {
-                    transform: translateY(-4px) rotate(8deg) scale(1.05);
-                }
+/* Controles Rotativos (Knobs Clásicos Estilo Hardware) */
+.flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 10px;
+}
 
-                50% {
-                    transform: translateY(-6px) rotate(0deg) scale(1);
-                }
+.knob-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
 
-                75% {
-                    transform: translateY(-2px) rotate(-8deg) scale(0.95);
-                }
+.knob-dial {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    background: radial-gradient(circle, #383838 0%, #1f1f1f 70%, #121212 100%);
+    border-radius: 50%;
+    border: 2px solid #555;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    touch-action: none;
+}
 
-                100% {
-                    transform: translateY(0px) rotate(0deg) scale(1);
-                }
-            }
+.knob-indicator {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 3px;
+    height: 14px;
+    background-color: #ff8c00;
+    border-radius: 2px;
+    transform-origin: 50% 20px;
+    /* Punto de pivote centrado en el radio del dial */
+    box-shadow: 0 0 8px #ff8c00;
+    transform: rotate(-135deg);
+}
 
-            .floating-bee {
-                display: inline-block;
-                animation: floatBee 1.8s ease-in-out infinite;
-                transform-origin: bottom center;
-                /* Hace que el balanceo se sienta natural desde la base */
-                will-change: transform;
-                /* Fuerza al navegador a optimizarlo por GPU */
-            }
-        }
+.knob-input {
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: #ffd700;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 3px;
+    width: 54px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+/* Contenedor EQ */
+.eq-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.eq-trim-section {
+    margin-top: 15px;
+    border-top: 1px dashed #444;
+    padding-top: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.reverb-control-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Animación Abejorro */
+@keyframes floatBee {
+    0% {
+        transform: translateY(0px) rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: translateY(-4px) rotate(8deg) scale(1.05);
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(0deg) scale(1);
+    }
+
+    75% {
+        transform: translateY(-2px) rotate(-8deg) scale(0.95);
+    }
+
+    100% {
+        transform: translateY(0px) rotate(0deg) scale(1);
+    }
+}
+
+.floating-bee {
+    display: inline-block;
+    animation: floatBee 1.8s ease-in-out infinite;
+    transform-origin: bottom center;
+    will-change: transform;
+}
+
+/* Media Queries Responsivas */
+@media (min-width: 768px) {
+    .master-control-bar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .source-group {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .action-buttons {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel {
+        padding: 8px;
+    }
+
+    h2 {
+        font-size: 1.15rem;
+    }
+
+    .rack-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eq-container {
+        gap: 6px !important;
+    }
+}
