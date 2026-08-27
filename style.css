@@ -1,0 +1,240 @@
+        /* ==========================================
+           ESTILOS GENERALES Y PALETA DE COLORES
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffd700;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Cinzel Decorative', serif;
+            color: #ff8c00;
+        }
+
+        a {
+            color: #ff8c00;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #ff8c00;
+            text-decoration: underline;
+        }
+
+        label,
+        .title {
+            color: #00f5ff !important;
+            font-size: 11px;
+        }
+
+        button:not(.power-switch),
+        #btnStart,
+        #btnStop {
+            background-color: #ff8c00 !important;
+            color: #121212 !important;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-height: 44px;
+            /* Tamaño mínimo táctil recomendado para móviles */
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        select {
+            background-color: #1a1a1a !important;
+            color: #ffd700 !important;
+            border: 1px solid #ff8c00 !important;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 40px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Rejilla Rack Adaptativa Móvil */
+        .rack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .module {
+            background: linear-gradient(145deg, #1a1a1a, #141414);
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.3s ease, border-color 0.3s ease;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+
+        .module-header h3 {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .power-switch {
+            background: #424242;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 32px;
+        }
+
+        .power-switch.active {
+            background: #4CAF50;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            color: #121212;
+        }
+
+        .patch-bay {
+            background-color: #181818;
+            border: 1px dashed #555;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .patch-bay h3 {
+            font-size: 13px;
+            color: #ff8c00;
+            margin-bottom: 4px;
+        }
+
+        .patch-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .patch-chip {
+            background: #252525;
+            border: 1px solid #666;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            color: #ffd700;
+            touch-action: none;
+        }
+
+        .visualizer-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100px;
+            display: block;
+        }
+
+        /* Contenedores Flexibles para Controles */
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-around;
+        }
+
+        /* Adaptación específica para pantallas móviles pequeñas */
+        @media (max-width: 768px) {
+            .panel {
+                padding: 8px;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+                text-align: center;
+            }
+
+            .rack-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .eq-container {
+                gap: 6px !important;
+            }
+
+            .knob-control-container {
+                transform: scale(0.95);
+            }
+
+            @keyframes floatBee {
+                0% {
+                    transform: translateY(0px) rotate(0deg) scale(1);
+                }
+
+                25% {
+                    transform: translateY(-4px) rotate(8deg) scale(1.05);
+                }
+
+                50% {
+                    transform: translateY(-6px) rotate(0deg) scale(1);
+                }
+
+                75% {
+                    transform: translateY(-2px) rotate(-8deg) scale(0.95);
+                }
+
+                100% {
+                    transform: translateY(0px) rotate(0deg) scale(1);
+                }
+            }
+
+            .floating-bee {
+                display: inline-block;
+                animation: floatBee 1.8s ease-in-out infinite;
+                transform-origin: bottom center;
+                /* Hace que el balanceo se sienta natural desde la base */
+                will-change: transform;
+                /* Fuerza al navegador a optimizarlo por GPU */
+            }
+        }
