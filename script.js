@@ -2,18 +2,23 @@
  * @file Consola DSP Modular con Web Audio API (Optimizada para Móviles y Perillas CSS Clásicas)
  */
 
-let audioCtx, streamOriginal, visualizacionId;
-let micSource, mainLowpass, postFilterGain;
-let bpHighFilter, bpLowFilter, bpPostGain;
-let eqPostGain;
-let chorusDelay, lfoNode, lfoGainNode, chorusDry, chorusWet, chorusOutput;
-let reverbConvolver, reverbDry, reverbWet, reverbOutput;
-let masterGain, analyser;
+// ==========================================
+// 1. DECLARACIÓN DE VARIABLES GLOBALES
+// ==========================================
+let audioCtx, streamOriginal, visualizacionId; // Contexto de audio principal, flujo multimedia de entrada y ID del bucle visual
+let micSource, mainLowpass, postFilterGain;    // Fuente de audio y nodos para el filtro pasa-bajos principal
+let bpHighFilter, bpLowFilter, bpPostGain;     // Nodos para el filtro de paso banda (Highpass + Lowpass)
+let eqPostGain;                                // Ganancia global de compensación para el ecualizador
+let chorusDelay, lfoNode, lfoGainNode, chorusDry, chorusWet, chorusOutput; // Nodos de retardo, LFO y mezcla para el efecto Chorus
+let reverbConvolver, reverbDry, reverbWet, reverbOutput;                 // Nodos de convolución y ganancias para la Reverberación
+let masterGain, analyser;                      // Control de volumen maestro y analizador de espectro para el visualizador
 
+// Definición de frecuencias estándar para un ecualizador gráfico de 10 bandas y sus etiquetas descriptivas
 const eqFrequencies = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 const eqLabels = ["31.5", "63", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"];
-let eqFilters = [];
+let eqFilters = []; // Almacenará los objetos BiquadFilter de cada banda del ecualizador
 
+// Estados de encendido (Power ON/OFF) independientes para cada módulo de efectos
 let powerStates = {
     eq: false,
     filter: false,
@@ -22,13 +27,18 @@ let powerStates = {
     reverb: false
 };
 
+// Orden inicial predeterminado en el que la señal de audio pasa a través de los efectos (Patch Bay modular)
 let cableOrder = ['filter', 'bandpass', 'eq', 'chorus', 'reverb'];
 
+// Configuración inicial del lienzo (Canvas) 2D para renderizar el analizador de espectro visual
 const canvas = document.getElementById('visualizer');
 const ctxCanvas = canvas.getContext('2d');
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
+// ==========================================
+// 2. CONSTRUCCIÓN DINÁMICA DE LA INTERFAZ DE ECUALIZACIÓN
+// ==========================================
 const eqContainer = document.getElementById('eqContainer');
 eqFrequencies.forEach((freq, index) => {
     const div = document.createElement('div');
@@ -41,6 +51,7 @@ eqFrequencies.forEach((freq, index) => {
     div.setAttribute('data-val', '0');
     div.setAttribute('data-unit', 'dB');
 
+    // Inyecta el marcado HTML para representar una perilla rotativa clásica por cada banda de frecuencia
     div.innerHTML = `
         <span class="title" style="font-size: 9px;">${eqLabels[index]}</span>
         <div class="knob-dial" style="width:36px;height:36px;"><div class="knob-indicator" style="top:3px;height:10px;transform-origin:50% 15px;"></div></div>
@@ -49,6 +60,15 @@ eqFrequencies.forEach((freq, index) => {
     eqContainer.appendChild(div);
 });
 
+// ==========================================
+// 3. FUNCIONES DE REVERBERACIÓN Y PROCESAMIENTO
+// ==========================================
+
+/**
+ * Genera algorítmicamente una respuesta al impulso estéreo simulando reflexiones acústicas.
+ * @param {number} duration - Duración de la cola de reverberación en segundos.
+ * @param {number} decay - Factor de atenuación exponencial del decaimiento.
+ */
 function generarImpulseResponse(duration, decay) {
     const sampleRate = audioCtx.sampleRate;
     const length = sampleRate * duration;
@@ -62,6 +82,9 @@ function generarImpulseResponse(duration, decay) {
     return impulse;
 }
 
+/**
+ * Actualiza el búfer de convolución del efecto Reverb según el preset seleccionado en la interfaz.
+ */
 function actualizarPresetReverb() {
     if (!audioCtx || !reverbConvolver) return;
     const preset = document.getElementById('reverbPreset').value;
@@ -74,8 +97,12 @@ function actualizarPresetReverb() {
     }
 }
 
+// ==========================================
+// 4. CONTROLADOR DE PERILLAS (MOUSE Y TÁCTIL)
+// ==========================================
+
 /**
- * Inicializa perillas rotativas CSS y gestiona la interacción Mouse y Touch.
+ * Inicializa perillas rotativas CSS y gestiona la interacción con el Mouse y Pantallas Táctiles.
  */
 function inicializarPerillas() {
     document.querySelectorAll('.knob-control-container').forEach(container => {
@@ -88,13 +115,14 @@ function inicializarPerillas() {
         const step = parseFloat(container.dataset.step);
         const param = container.dataset.param;
 
+        // Actualiza la representación gráfica de la perilla y aplica los cambios en el motor DSP de audio
         function actualizarGraficoYAudio(val) {
             val = Math.max(min, Math.min(max, val));
             const decimals = (step.toString().split('.')[1] || '').length;
             val = parseFloat(val.toFixed(decimals));
             input.value = val;
 
-            // Mapeo lineal del valor a grados de rotación (-135° a +135°, total 270°)
+            // Mapeo lineal del valor numérico a grados de rotación (-135° a +135°, total de 270°)
             const porcentaje = (val - min) / (max - min);
             const angle = -135 + (porcentaje * 270);
             if (indicator) {
@@ -106,6 +134,7 @@ function inicializarPerillas() {
 
         let isDragging = false, startY = 0, startVal = 0;
 
+        // Inicia el gesto de arrastre vertical para mover la perilla
         function handleStart(clientY) {
             if (input.disabled) return;
             isDragging = true;
@@ -114,6 +143,7 @@ function inicializarPerillas() {
             document.body.style.cursor = 'ns-resize';
         }
 
+        // Calcula el desplazamiento vertical del cursor o dedo y ajusta el valor proporcionalmente
         function handleMove(clientY) {
             if (!isDragging) return;
             const deltaY = startY - clientY;
@@ -122,6 +152,7 @@ function inicializarPerillas() {
             actualizarGraficoYAudio(newVal);
         }
 
+        // Finaliza la interacción de arrastre
         function handleEnd() {
             if (isDragging) {
                 isDragging = false;
@@ -129,12 +160,12 @@ function inicializarPerillas() {
             }
         }
 
-        // Eventos de Mouse
+        // Eventos de interacción con el Mouse
         wrapper.addEventListener('mousedown', (e) => { handleStart(e.clientY); e.preventDefault(); });
         window.addEventListener('mousemove', (e) => { handleMove(e.clientY); });
         window.addEventListener('mouseup', handleEnd);
 
-        // Eventos Táctiles (Móvil / Tablet)
+        // Eventos de interacción Táctil para dispositivos móviles y tablets
         wrapper.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) handleStart(e.touches[0].clientY);
             e.preventDefault();
@@ -146,35 +177,44 @@ function inicializarPerillas() {
 
         window.addEventListener('touchend', handleEnd);
 
+        // Permite la sincronización si el usuario escribe directamente en el input numérico oculto/secundario
         input.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             if (!isNaN(val)) actualizarGraficoYAudio(val);
         });
 
+        // Inicializa la perilla con su valor predeterminado
         actualizarGraficoYAudio(parseFloat(input.value));
     });
 }
 
+/**
+ * Traduce los cambios físicos de las perillas en modificaciones de parámetros de los nodos Web Audio API en tiempo real.
+ */
 function aplicarCambioAudio(param, val, container) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     const nyquistLimit = audioCtx.sampleRate / 2 - 100;
 
+    // Modifica las bandas del ecualizador si está encendido
     if (param.startsWith('eq_') && powerStates.eq) {
         const index = parseInt(container.dataset.eqIndex);
         if (eqFilters[index]) eqFilters[index].gain.setTargetAtTime(val, now, 0.05);
     } else if (param === 'eqGain' && powerStates.eq) {
         if (eqPostGain) eqPostGain.gain.setTargetAtTime(val, now, 0.05);
+    // Modifica los parámetros del filtro Lowpass principal
     } else if (param === 'fc' && powerStates.filter) {
         if (mainLowpass) mainLowpass.frequency.setTargetAtTime(Math.max(10, Math.min(nyquistLimit, val)), now, 0.05);
     } else if (param === 'qFactor' && powerStates.filter) {
         if (mainLowpass) mainLowpass.Q.setTargetAtTime(Math.max(0.0001, Math.min(15, val)), now, 0.05);
     } else if (param === 'gainFiltro' && powerStates.filter) {
         if (postFilterGain) postFilterGain.gain.setTargetAtTime(val, now, 0.05);
+    // Modifica los cortes del filtro Bandpass
     } else if (param === 'bpLowCut' && powerStates.bandpass) {
         if (bpHighFilter) bpHighFilter.frequency.setTargetAtTime(Math.max(10, Math.min(nyquistLimit, val)), now, 0.05);
     } else if (param === 'bpHighCut' && powerStates.bandpass) {
         if (bpLowFilter) bpLowFilter.frequency.setTargetAtTime(Math.max(100, Math.min(nyquistLimit, val)), now, 0.05);
+    // Modifica los parámetros del efecto Chorus (Velocidad, Profundidad y Mezcla Dry/Wet)
     } else if (param === 'chorusRate' && powerStates.chorus) {
         if (lfoNode) lfoNode.frequency.setTargetAtTime(val, now, 0.05);
     } else if (param === 'chorusDepth' && powerStates.chorus) {
@@ -184,17 +224,26 @@ function aplicarCambioAudio(param, val, container) {
             chorusDry.gain.setTargetAtTime(Math.cos(val * 0.5 * Math.PI), now, 0.05);
             chorusWet.gain.setTargetAtTime(Math.sin(val * 0.5 * Math.PI), now, 0.05);
         }
+    // Modifica el volumen general de salida maestro
     } else if (param === 'volMaster') {
         if (masterGain) masterGain.gain.setTargetAtTime(val, now, 0.05);
     }
 }
 
+// Inicialización de componentes cuando el DOM termina de cargar
 window.addEventListener('DOMContentLoaded', () => {
     inicializarPerillas();
     configurarPatchBayDragAndDrop();
     document.getElementById('reverbPreset').addEventListener('change', actualizarPresetReverb);
 });
 
+// ==========================================
+// 5. GESTIÓN DEL PATCH BAY Y RUTEO MODULAR
+// ==========================================
+
+/**
+ * Configura la funcionalidad de arrastrar y soltar (Drag and Drop) para reordenar los módulos de efectos visualmente.
+ */
 function configurarPatchBayDragAndDrop() {
     const slots = document.getElementById('patchSlots');
     let draggedItem = null;
@@ -225,12 +274,18 @@ function configurarPatchBayDragAndDrop() {
     });
 }
 
+/**
+ * Lee el nuevo orden de los elementos visuales en el DOM y reconstruye el flujo de audio en cadena.
+ */
 function actualizarOrdenCablesDesdeDOM() {
     const chips = document.querySelectorAll('#patchSlots .patch-chip');
     cableOrder = Array.from(chips).map(c => c.dataset.mod);
     if (audioCtx) reconstruirGrafoDeAudio();
 }
 
+/**
+ * Configura los botones de encendido/apagado (Power) individuales para cada efecto de la consola.
+ */
 function setupPowerButton(btnId, modKey, uiId) {
     document.getElementById(btnId).addEventListener('click', () => {
         powerStates[modKey] = !powerStates[modKey];
@@ -245,15 +300,21 @@ function setupPowerButton(btnId, modKey, uiId) {
     });
 }
 
+// Vinculación de los botones de encendido por módulo
 setupPowerButton('btnFilterPower', 'filter', 'modFilter');
 setupPowerButton('btnBandpassPower', 'bandpass', 'modBandpass');
 setupPowerButton('btnEqPower', 'eq', 'modEq');
 setupPowerButton('btnChorusPower', 'chorus', 'modChorus');
 setupPowerButton('btnReverbPower', 'reverb', 'modReverb');
 
+/**
+ * Desconecta todos los nodos del grafo actual y los vuelve a interconectar dinámicamente
+ * respetando el orden especificado en `cableOrder` y el estado de encendido (`powerStates`).
+ */
 function reconstruirGrafoDeAudio() {
     if (!audioCtx) return;
 
+    // Desconecta preventivamente todos los nodos de audio para evitar fugas de memoria o ruidos parásitos
     micSource.disconnect();
     mainLowpass.disconnect();
     postFilterGain.disconnect();
@@ -275,6 +336,7 @@ function reconstruirGrafoDeAudio() {
 
     let currentNode = micSource;
 
+    // Recorre el orden de los módulos configurados en el patch bay modular
     cableOrder.forEach(mod => {
         if (mod === 'filter') {
             currentNode.connect(mainLowpass);
@@ -283,7 +345,7 @@ function reconstruirGrafoDeAudio() {
 
             if (!powerStates.filter) {
                 postFilterGain.gain.value = 1;
-                mainLowpass.frequency.value = 20000;
+                mainLowpass.frequency.value = 20000; // Bypass si está apagado
             } else {
                 const val = parseFloat(document.querySelector('.knob-control-container[data-param="gainFiltro"] input').value);
                 postFilterGain.gain.value = val;
@@ -354,41 +416,54 @@ function reconstruirGrafoDeAudio() {
         }
     });
 
+    // Envía la cadena de procesamiento final al canal maestro, analizador y salida de audio física
     currentNode.connect(masterGain);
     masterGain.connect(analyser);
     masterGain.connect(audioCtx.destination);
 }
 
+// ==========================================
+// 6. CONTROL DE INICIO Y CIERRE DEL MOTOR DE AUDIO
+// ==========================================
+
+// Evento al presionar el botón de inicio de audio
 document.getElementById('btnStart').addEventListener('click', async () => {
     try {
         const sourceType = document.getElementById('audioSource').value;
         if (sourceType === 'mic') {
+            // Captura de audio desde el micrófono del dispositivo
             streamOriginal = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         } else {
+            // Captura de audio desde una pestaña o pantalla compartida
             streamOriginal = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            streamOriginal.getVideoTracks().forEach(track => track.stop());
+            streamOriginal.getVideoTracks().forEach(track => track.stop()); // Detiene el vídeo ya que solo se requiere audio
         }
 
+        // Instanciación del contexto principal de Web Audio API
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
 
         document.getElementById('lblFs').textContent = `fs: ${(audioCtx.sampleRate / 1000).toFixed(1)} kHz`;
 
+        // Creación y configuración inicial de los nodos DSP principales
         micSource = audioCtx.createMediaStreamSource(streamOriginal);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
         masterGain = audioCtx.createGain();
 
+        // Configuración del filtro Lowpass
         mainLowpass = audioCtx.createBiquadFilter();
         postFilterGain = audioCtx.createGain();
         mainLowpass.type = 'lowpass';
 
+        // Configuración del filtro Bandpass
         bpHighFilter = audioCtx.createBiquadFilter();
         bpLowFilter = audioCtx.createBiquadFilter();
         bpHighFilter.type = 'highpass';
         bpLowFilter.type = 'lowpass';
         bpPostGain = audioCtx.createGain();
 
+        // Configuración de las bandas del ecualizador paramétrico/peaking
         eqFilters = eqFrequencies.map(freq => {
             const filter = audioCtx.createBiquadFilter();
             filter.type = 'peaking';
@@ -399,6 +474,7 @@ document.getElementById('btnStart').addEventListener('click', async () => {
         });
         eqPostGain = audioCtx.createGain();
 
+        // Configuración del efecto Chorus con un oscilador LFO modulando el tiempo de retardo
         chorusDelay = audioCtx.createDelay(0.1);
         chorusDelay.delayTime.value = 0.025;
         lfoNode = audioCtx.createOscillator();
@@ -414,6 +490,7 @@ document.getElementById('btnStart').addEventListener('click', async () => {
         chorusWet = audioCtx.createGain();
         chorusOutput = audioCtx.createGain();
 
+        // Configuración del efecto Reverb (Convolución)
         reverbConvolver = audioCtx.createConvolver();
         actualizarPresetReverb();
         reverbDry = audioCtx.createGain();
@@ -422,8 +499,10 @@ document.getElementById('btnStart').addEventListener('click', async () => {
 
         masterGain.gain.value = parseFloat(document.querySelector('.knob-control-container[data-param="volMaster"] input').value);
 
+        // Genera el grafo de conexiones inicial
         reconstruirGrafoDeAudio();
 
+        // Intercambio de visibilidad de botones de control general
         document.getElementById('btnStart').style.display = 'none';
         document.getElementById('btnStop').style.display = 'block';
         document.getElementById('audioSource').disabled = true;
@@ -435,6 +514,7 @@ document.getElementById('btnStart').addEventListener('click', async () => {
     }
 });
 
+// Evento al presionar el botón de detención y apagado del sistema de audio
 document.getElementById('btnStop').addEventListener('click', () => {
     if (streamOriginal) streamOriginal.getTracks().forEach(track => track.stop());
     if (audioCtx) {
@@ -448,6 +528,13 @@ document.getElementById('btnStop').addEventListener('click', () => {
     document.getElementById('freqDescription').textContent = "Frecuencia Dominante: --";
 });
 
+// ==========================================
+// 7. VISUALIZADOR DE ESPECTRO EN TIEMPO REAL
+// ==========================================
+
+/**
+ * Traduce un valor en Hz al rango musical descriptivo correspondiente.
+ */
 function obtenerNombreRangoFrecuencia(freqHz) {
     if (freqHz < 60) return "Sub-graves (< 60 Hz)";
     if (freqHz < 250) return "Graves (60 - 250 Hz)";
@@ -458,6 +545,9 @@ function obtenerNombreRangoFrecuencia(freqHz) {
     return "Aire (> 12 kHz)";
 }
 
+/**
+ * Inicia el bucle gráfico de renderizado del analizador en el Canvas empleando requestAnimationFrame.
+ */
 function iniciarVisualizadorAvanzado() {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -466,14 +556,17 @@ function iniciarVisualizadorAvanzado() {
         if (!audioCtx || audioCtx.state === 'closed') return;
         visualizacionId = requestAnimationFrame(loop);
 
+        // Obtiene los datos de frecuencia del analizador de audio
         analyser.getByteFrequencyData(dataArray);
 
+        // Limpia el lienzo del canvas
         ctxCanvas.fillStyle = '#111';
         ctxCanvas.fillRect(0, 0, canvas.width, canvas.height);
 
         const barWidth = (canvas.width / bufferLength) * 1.8;
         let barHeight, x = 0, maxVal = 0, maxIndex = 0;
 
+        // Dibuja las barras del espectro de frecuencias aplicando un mapa cromático HSL
         for (let i = 0; i < bufferLength; i++) {
             barHeight = (dataArray[i] / 255) * canvas.height;
             if (dataArray[i] > maxVal) {
@@ -486,6 +579,7 @@ function iniciarVisualizadorAvanzado() {
             x += barWidth + 1;
         }
 
+        // Calcula y muestra la frecuencia dominante detectada en el audio
         const dominantFreq = (maxIndex / bufferLength) * (audioCtx.sampleRate / 2);
         if (maxVal > 20) {
             document.getElementById('freqDescription').textContent =
